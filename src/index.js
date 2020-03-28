@@ -25,6 +25,13 @@ const xChain = (target = {}, fileds = [], callback = () => {}) => {
   }
 
   function createFuncChain(applyPath, isEnd, defaultValue) {
+  
+    if (isEnd) {
+      return function() {
+        console.log(applyPath);
+      };
+    }
+
     return function() {
       function chain() {
         console.log(chain._applyPath, ...args);
@@ -36,11 +43,6 @@ const xChain = (target = {}, fileds = [], callback = () => {}) => {
       return chain;
     }
 
-    if (isEnd) {
-      return function() {
-
-      };
-    }
   }
 
   let hasFun = false;
@@ -57,7 +59,7 @@ const xChain = (target = {}, fileds = [], callback = () => {}) => {
       if (isEnd) hasEnd = true;
 
       props[funcName] = propConfig(function() {
-        return createFuncChain((this._applyPath || []).concat({ funcName: defaultValue }), isEnd);
+        return createFuncChain((this._applyPath || []).concat({ [funcName]: defaultValue }), isEnd);
       });
     } else {
       props[key] = propConfig(function() {

@@ -8,6 +8,6 @@ const t = xChain({}, ['a', 'b', "c", "d", 'dd()$'], function (paths) {
 
 console.log(t);
 
-t.a.b.c.d(11);
+t.a.b.c.d.dd(11);
 
 t.b.c.a(11);
