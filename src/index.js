@@ -11,9 +11,9 @@ const propConfig = getter => {
 };
 const formatValue = value => new Function('', `return ${value}`)();
 const getCurrentApplyPath = (type, key, val) => {
-  if (type === 'boolean') {
+  if (type === 'boolean' || type === 'b') {
     return { [key]: true };
-  } else if (type === 'any') {
+  } else if (type === 'any' || type === 'a') {
     return { [key]: val };
   }
   return key;
@@ -32,12 +32,7 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
 
     return chain;
   }
-
-  function createEndPropChain(applyPath, type, funcName) {
-    const currentPath = getCurrentApplyPath(type, funcName);
-    callback.call(target, applyPath.concat(currentPath));
-  }
-
+  
   function createFuncChain(applyPath, type, funcName, defVal) {
     return function (val) {
       const finalVal = typeof val === 'undefined' ? defVal : val;
@@ -65,7 +60,7 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
     .map(key => (key || '').trim())
     .filter(key => key)
     .forEach(key => {
-      const reg = /^(<(boolean|any)>)?(\w+?)(\(((.|\n)*?)\))?(\$)?$/g;
+      const reg = /^(<(boolean|b|any|a)>)?(\w+?)(\(((.|\n)*?)\))?(\$)?$/g;
       if (!reg.test(key)) {
         throw new Error(`Illegal parameter ${key}`);
       }
@@ -87,9 +82,8 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
         });
       } else {
         props[funcName] = propConfig(function () {
-          const type = paramType === 'any' ? '' : paramType;
-          const applyPath = [this._applyPath || [], type, funcName];
-          return isEnd ? createEndPropChain(...applyPath) : createPropChain(...applyPath);
+          const applyPath = [this._applyPath || [], paramType, funcName];
+          return createPropChain(...applyPath);
         });
       }
     });
