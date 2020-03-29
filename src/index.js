@@ -49,10 +49,10 @@ const xChain = (target = {}, fileds = [], callback = () => {}) => {
   const props = {};
 
   fileds.forEach(key => {
-    if (/(.*?)\((.*?)\)(\$?)$/g.test(key)) {
+    if (/(.*?)\(((.|\n)*?)\)(\$?)$/gm.test(key)) {
       const funcName = RegExp.$1;
       const defValue = RegExp.$2;
-      const isEndFun = RegExp.$3;
+      const isEndFun = RegExp.$4;
       const defVal = formatValue(defValue);
 
       hasFun = true;
