@@ -5,13 +5,13 @@ ll: 11,
 op:123
 }`
 // console.log(`dd(${g})$`);
-const t = xChain({}, ['a', 'b', "c", "d", `dd(${g})$`, 's()'], function (paths) {
+const t = xChain({}, ['<boolean>a', '<any>b', "c", "d", `dd(${g})$`, 's()'], function (paths) {
     console.log(paths);
 });
 
 
 // console.log(t);
 
-t.a.b.c.d.dd(11);
+t.a.b.c();
 
-t.b.c.a.s().dd().d();
+t.b.c.a.s().dd(11);
