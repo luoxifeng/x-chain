@@ -9,6 +9,7 @@ const propConfig = getter => {
     configurable: false
   }
 };
+const formatValue = value => new Function('', `return ${value}`)();
 
 
 const xChain = (target = {}, fileds = [], callback = () => {}) => {
@@ -42,24 +43,38 @@ const xChain = (target = {}, fileds = [], callback = () => {}) => {
   
       return chain;
     }
-
   }
+
+ 
+
 
   let hasFun = false;
   let hasEnd = false;
   const props = {};
 
+  function createEndFuncChain(applyPath) {
+    
+    return function() {
+      callback.call(target, applyPath);
+    };
+  }
+
+
   fileds.forEach(key => {
     if (/(.*?)\((.*?)\)(\$?)$/g.test(key)) {
       const funcName = RegExp.$1;
-      const defaultValue = RegExp.$2;
-      const isEnd = RegExp.$3;
+      const defValue = RegExp.$2;
+      const isEndFun = RegExp.$3;
+      const defVal = formatValue(defValue);
 
       hasFun = true;
-      if (isEnd) hasEnd = true;
+      if (isEndFun) hasEnd = true;
+
+      console.log(typeof defVal, 'defaultValue', defVal);
 
       props[funcName] = propConfig(function() {
-        return createFuncChain((this._applyPath || []).concat({ [funcName]: defaultValue }), isEnd);
+        const applyPath = (this._applyPath || []).concat({ [funcName]: defVal });
+        return isEndFun ? createEndFuncChain(applyPath) : createFuncChain(applyPath);
       });
     } else {
       props[key] = propConfig(function() {

@@ -1,7 +1,7 @@
 const xChain = require('../src');
 
 
-const t = xChain({}, ['a', 'b', "c", "d", 'dd()$'], function (paths) {
+const t = xChain({}, ['a', 'b', "c", "d", 'dd(12)$'], function (paths) {
     console.log(paths, this === t);
 });
 
