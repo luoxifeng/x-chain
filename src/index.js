@@ -81,6 +81,7 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
           return isEnd ? createEndFuncChain(...applyPath) : createFuncChain(...applyPath);
         });
       } else {
+        hasEnd = true;
         props[funcName] = propConfig(function () {
           const applyPath = [this._applyPath || [], paramType, funcName];
           return createPropChain(...applyPath);

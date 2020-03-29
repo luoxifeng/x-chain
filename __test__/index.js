@@ -18,7 +18,7 @@ t.a.b.c.s(1).dd();
 
 // t.b.c.a.s().dd(123);
 
-const tt = xChain({}, ['position("top")', 'duration(1000)', "message('你好')", 'success$', 'error$'], function (paths) {
+const tt = xChain({}, ['position("top")', 'duration(1000)', "message('你好')", 'success', 'error'], function (paths) {
     console.log(paths);
 });
 
