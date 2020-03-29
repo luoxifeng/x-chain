@@ -10,9 +10,13 @@ const propConfig = getter => {
   }
 };
 const formatValue = value => new Function('', `return ${value}`)();
+const getType = (target = '') => {
+  const match = target.match(/^<(s|string|b|boolean|n|number)>/)
+  const typeStr = (match || [])[1] || '';
+}
 
 
-const xChain = (target = {}, fileds = [], callback = () => {}) => {
+const xChain = (target = {}, fileds = [], callback = () => { }) => {
 
   function createPropChain(applyPath) {
     function chain() {
@@ -26,20 +30,20 @@ const xChain = (target = {}, fileds = [], callback = () => {}) => {
   }
 
   function createFuncChain(applyPath) {
-    return function() {
+    return function () {
       function chain() {
         console.log(chain._applyPath, ...args);
       }
-  
+
       chain.__proto__ = proto;
       chain._applyPath = applyPath;
-  
+
       return chain;
     }
   }
 
   function createEndFuncChain(applyPath) {
-    return function() {
+    return function () {
       callback.call(target, applyPath);
     };
   }
@@ -48,28 +52,31 @@ const xChain = (target = {}, fileds = [], callback = () => {}) => {
   let hasEnd = false;
   const props = {};
 
-  fileds.forEach(key => {
-    if (/(.*?)\(((.|\n)*?)\)(\$?)$/gm.test(key)) {
-      const funcName = RegExp.$1;
-      const defValue = RegExp.$2;
-      const isEndFun = RegExp.$4;
-      const defVal = formatValue(defValue);
+  fileds
+    .filter(key => (key || '').trim())
+    .forEach(key => {
+      const typeStr = getType(key);
+      if (/(.*?)\(((.|\n)*?)\)(\$?)$/gm.test(key)) {
+        const funcName = RegExp.$1;
+        const defValue = RegExp.$2;
+        const isEndFun = RegExp.$4;
+        const defVal = formatValue(defValue);
 
-      hasFun = true;
-      if (isEndFun) hasEnd = true;
+        hasFun = true;
+        if (isEndFun) hasEnd = true;
 
-      console.log(typeof defVal, 'defaultValue', defVal);
+        console.log(typeof defVal, 'defaultValue', defVal);
 
-      props[funcName] = propConfig(function() {
-        const applyPath = (this._applyPath || []).concat({ [funcName]: defVal });
-        return isEndFun ? createEndFuncChain(applyPath) : createFuncChain(applyPath);
-      });
-    } else {
-      props[key] = propConfig(function() {
-        return createPropChain((this._applyPath || []).concat(key));
-      });
-    }
-  });
+        props[funcName] = propConfig(function () {
+          const applyPath = (this._applyPath || []).concat({ [funcName]: defVal });
+          return isEndFun ? createEndFuncChain(applyPath) : createFuncChain(applyPath);
+        });
+      } else {
+        props[key] = propConfig(function () {
+          return createPropChain((this._applyPath || []).concat(key));
+        });
+      }
+    });
 
   if (hasFun && !hasEnd) {
     throw new Error(`
