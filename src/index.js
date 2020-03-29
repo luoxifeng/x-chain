@@ -14,7 +14,7 @@ const formatValue = value => new Function('', `return ${value}`)();
 
 const xChain = (target = {}, fileds = [], callback = () => {}) => {
 
-  function createChain(applyPath) {
+  function createPropChain(applyPath) {
     function chain() {
       callback.call(target, applyPath);
     }
@@ -25,14 +25,7 @@ const xChain = (target = {}, fileds = [], callback = () => {}) => {
     return chain;
   }
 
-  function createFuncChain(applyPath, isEnd, defaultValue) {
-  
-    if (isEnd) {
-      return function() {
-        console.log(applyPath);
-      };
-    }
-
+  function createFuncChain(applyPath) {
     return function() {
       function chain() {
         console.log(chain._applyPath, ...args);
@@ -45,20 +38,15 @@ const xChain = (target = {}, fileds = [], callback = () => {}) => {
     }
   }
 
- 
-
-
-  let hasFun = false;
-  let hasEnd = false;
-  const props = {};
-
   function createEndFuncChain(applyPath) {
-    
     return function() {
       callback.call(target, applyPath);
     };
   }
 
+  let hasFun = false;
+  let hasEnd = false;
+  const props = {};
 
   fileds.forEach(key => {
     if (/(.*?)\((.*?)\)(\$?)$/g.test(key)) {
@@ -78,13 +66,16 @@ const xChain = (target = {}, fileds = [], callback = () => {}) => {
       });
     } else {
       props[key] = propConfig(function() {
-        return createChain((this._applyPath || []).concat(key));
+        return createPropChain((this._applyPath || []).concat(key));
       });
     }
   });
 
   if (hasFun && !hasEnd) {
-    throw new Error('++++++');
+    throw new Error(`
+      requires at least one ending function when Function chain is configured;
+      eg: 'foo()$'
+    `);
   }
 
   const proto = defineProps(function () { }, props);
