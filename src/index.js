@@ -32,7 +32,7 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
 
     return chain;
   }
-  
+
   function createFuncChain(applyPath, type, funcName, defVal) {
     return function (val) {
       const finalVal = typeof val === 'undefined' ? defVal : val;
@@ -69,12 +69,12 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
       const isFunc = RegExp.$4;
       const defValue = RegExp.$5;
       const isEnd = RegExp.$7;
+      if (isEnd) hasEnd = true;
 
       if (isFunc) {
         const defVal = formatValue(defValue);
-
         hasFun = true;
-        if (isEnd) hasEnd = true;
+        
         props[funcName] = propConfig(function () {
           const type = defVal !== 'undefined' ? 'any' : paramType;
           const applyPath = [this._applyPath || [], type, funcName, defVal];
