@@ -4,7 +4,7 @@ var g = `{
 ll: 11,
 op:123
 }`
-console.log(`dd(${g})$`);
+// console.log(`dd(${g})$`);
 const t = xChain({}, ['a', 'b', "c", "d", `dd(${g})$`, 's()'], function (paths) {
     console.log(paths);
 });

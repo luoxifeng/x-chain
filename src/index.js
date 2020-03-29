@@ -10,15 +10,19 @@ const propConfig = getter => {
   }
 };
 const formatValue = value => new Function('', `return ${value}`)();
-const getType = (target = '') => {
-  const match = target.match(/^<(s|string|b|boolean|n|number)>/)
-  const typeStr = (match || [])[1] || '';
+const getCurrentApplyPath = (type, key, val) => {
+  if (type === 'boolean') {
+    return { [key]: true };
+  } else if (type === 'any') {
+    return { [key]: val };
+  }
+  return key;
 }
 
 
 const xChain = (target = {}, fileds = [], callback = () => { }) => {
 
-  function createPropChain(applyPath) {
+  function createPropChain(applyPath, type, funcName) {
     function chain() {
       callback.call(target, applyPath);
     }
@@ -29,8 +33,13 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
     return chain;
   }
 
-  function createEndPropChain(applyPath) {
-    callback.call(target, applyPath);
+  function createEndPropChain(applyPath, type, funcName) {
+    if (type === 'any') {
+      console.warn(`'<any>${funcName}$' is illegal, Because ending prop chain not support type <any>, please use '<boolean>>${funcName}' or '>${funcName}'`);
+      type = 'boolean';
+    }
+    const currentPath = getCurrentApplyPath(type, funcName);
+    callback.call(target, applyPath.concat(currentPath));
   }
 
   function createFuncChain(applyPath) {
@@ -57,32 +66,26 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
   const props = {};
 
   fileds
-    .filter(key => (key || '').trim())
+    .map(key => (key || '').trim())
+    .filter(key => key)
     .forEach(key => {
-      const match = key.match(/^(<(boolean|any)>)?(.*?)\((.*?)\)(\$?)$/m);
-      if (!match.length) {
-        throw new Error('Illegal parameter');
+      const reg = /^(<(boolean|any)>)?(\w+?)(\(((.|\n)*?)\))?(\$)?$/g;
+      if (!reg.test(key)) {
+        throw new Error(`Illegal parameter ${key}`);
       }
+      const paramType = RegExp.$2;
+      const funcName = RegExp.$3;
+      const isFunc = RegExp.$4;
+      const defValue = RegExp.$5;
+      const isEnd = RegExp.$6;
 
-      const [
-        ,
-        ,
-        paramType,
-        funcName,
-        isFunc,
-        defValue,
-        isEnd
-      ] = match;
       if (isFunc) {
-        // const funcName = RegExp.$1;
-        // const defValue = RegExp.$2;
-        // const isEndFun = RegExp.$4;
         const defVal = formatValue(defValue);
 
         hasFun = true;
         if (isEnd) hasEnd = true;
 
-        console.log(typeof defVal, 'defaultValue', defVal);
+        // console.log(typeof defVal, 'defaultValue', defVal);
 
         props[funcName] = propConfig(function () {
           const applyPath = (this._applyPath || []).concat({ [funcName]: defVal });
@@ -90,8 +93,8 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
         });
       } else {
         props[funcName] = propConfig(function () {
-          const applyPath = (this._applyPath || []).concat(key);
-          return isEnd ? createEndPropChain(applyPath) : createPropChain(applyPath);
+          const applyPath = [(this._applyPath || []), paramType, funcName];
+          return isEnd ? createEndPropChain(...applyPath) : createPropChain(...applyPath);
         });
       }
     });
