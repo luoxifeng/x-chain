@@ -28,36 +28,32 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
     }
 
     chain.__proto__ = proto;
-    chain._applyPath = [...applyPath, getCurrentApplyPath(type === 'any' ? '' : type, funcName)];
+    chain._applyPath = [...applyPath, getCurrentApplyPath(type, funcName)];
 
     return chain;
   }
 
   function createEndPropChain(applyPath, type, funcName) {
-    if (type === 'any') {
-      console.warn(`'<any>${funcName}$' is illegal, Because ending prop chain not support type <any>, please use '<boolean>>${funcName}' or '>${funcName}'`);
-      type = '';
-    }
     const currentPath = getCurrentApplyPath(type, funcName);
     callback.call(target, applyPath.concat(currentPath));
   }
 
-  function createFuncChain(applyPath) {
-    return function () {
-      function chain() {
-        console.log(chain._applyPath, ...args);
-      }
-
+  function createFuncChain(applyPath, type, funcName, defVal) {
+    return function (val) {
+      const finalVal = typeof val === 'undefined' ? defVal : val;
+      
+      function chain() {}
       chain.__proto__ = proto;
-      chain._applyPath = applyPath;
+      chain._applyPath = [...applyPath, getCurrentApplyPath(type, funcName, finalVal)];
 
       return chain;
     }
   }
 
-  function createEndFuncChain(applyPath) {
-    return function () {
-      callback.call(target, applyPath);
+  function createEndFuncChain(applyPath, type, funcName, defVal) {
+    return function (val) {
+      const finalVal = typeof val === 'undefined' ? defVal : val;
+      callback.call(target, [...applyPath, getCurrentApplyPath(type, funcName, finalVal)]);
     };
   }
 
@@ -85,12 +81,14 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
         hasFun = true;
         if (isEnd) hasEnd = true;
         props[funcName] = propConfig(function () {
-          const applyPath = (this._applyPath || []).concat({ [funcName]: defVal });
-          return isEnd ? createEndFuncChain(applyPath) : createFuncChain(applyPath);
+          const type = defVal !== 'undefined' ? 'any' : paramType;
+          const applyPath = [this._applyPath || [], type, funcName, defVal];
+          return isEnd ? createEndFuncChain(...applyPath) : createFuncChain(...applyPath);
         });
       } else {
         props[funcName] = propConfig(function () {
-          const applyPath = [(this._applyPath || []), paramType, funcName];
+          const type = paramType === 'any' ? '' : paramType;
+          const applyPath = [this._applyPath || [], type, funcName];
           return isEnd ? createEndPropChain(...applyPath) : createPropChain(...applyPath);
         });
       }

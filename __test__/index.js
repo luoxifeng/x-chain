@@ -14,4 +14,4 @@ const t = xChain({}, ['<boolean>a', '<any>b', "c", "d", `dd(${g})$`, 's()'], fun
 
 t.a.b.c();
 
-t.b.c.a.s().dd(11);
+t.b.c.a.s().dd(123);
