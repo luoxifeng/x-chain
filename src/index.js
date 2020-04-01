@@ -24,7 +24,7 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
 
   function createPropChain(applyPath, type, funcName) {
     function chain(val) {
-      callback.call(target, [...applyPath, getCurrentApplyPath(type, funcName, val)]);
+      return callback.call(target, [...applyPath, getCurrentApplyPath(type, funcName, val)]);
     }
 
     chain.__proto__ = proto;
@@ -32,6 +32,12 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
 
     return chain;
   }
+
+  function createEndPropChain(applyPath, type, funcName) {
+    const currentPath = getCurrentApplyPath(type, funcName);
+    return callback.call(target, applyPath.concat(currentPath));
+  }
+
 
   function createFuncChain(applyPath, type, funcName, defVal) {
     return function (val) {
@@ -48,7 +54,7 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
   function createEndFuncChain(applyPath, type, funcName, defVal) {
     return function (val) {
       const finalVal = typeof val === 'undefined' ? defVal : val;
-      callback.call(target, [...applyPath, getCurrentApplyPath(type, funcName, finalVal)]);
+      return callback.call(target, [...applyPath, getCurrentApplyPath(type, funcName, finalVal)]);
     };
   }
 
@@ -73,18 +79,19 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
 
       if (isFunc) {
         const defVal = formatValue(defValue);
+
         hasFun = true;
-        
         props[funcName] = propConfig(function () {
           const type = defVal !== 'undefined' ? 'any' : paramType;
           const applyPath = [this._applyPath || [], type, funcName, defVal];
-          return isEnd ? createEndFuncChain(...applyPath) : createFuncChain(...applyPath);
+          return (isEnd ? createEndFuncChain : createFuncChain)(...applyPath);
         });
       } else {
         hasEnd = true;
         props[funcName] = propConfig(function () {
-          const applyPath = [this._applyPath || [], paramType, funcName];
-          return createPropChain(...applyPath);
+          const type = paramType === 'any' ? '' : paramType;
+          const applyPath = [this._applyPath || [], type, funcName];
+          return (isEnd ? createEndPropChain : createPropChain)(...applyPath);
         });
       }
     });
