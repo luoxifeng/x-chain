@@ -32,7 +32,7 @@ console.log(wow); // You can do some amazing things by it
 
 ```javascript
 
-const _ = xChain({}, ['a', 'b', "c", "d", 'dd(12)~-1', 's(2)'], function (paths) {
+const _ = xChain({}, ['a', 'b', "c", "d", 'dd(12)', 's(2)'], function (paths) {
     console.log(paths);
 });
 
@@ -79,13 +79,13 @@ const cfg = [
     'position("top")',
     'duration(1000)',
     "message('你好')",
-    'success',
+    '<i>success',
     'error'
 ];
 const _ = xChain({}, cfg, console.log);
 
 _.duration(2000).position().message('成功了').success();
-// output: [{ duration: 2000 }, { position: 'top' }, { message: '成功了' }, 'success']
+// output: [{ duration: 2000 }, { position: 'top' }, { message: '成功了' }]
 
 _.position('left').duration().message('出错了').error();
 // output: [{ position: 'left' }, { duration: 1000 }, { message: '出错了' }, 'error']
