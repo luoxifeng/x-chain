@@ -42,15 +42,22 @@ _.b.c.a.s().a(); // [ 'b', 'c', 'a', { s: 2 }, 'a' ]
 
 ```
 
-## Document
+## 标准模式
 
 ```none
-
-[<a|b|i>]foo[([default])][~(|^|$|+|0-Infinite)]
-
+ [<a|b|i>]foo[([default])][~(|^|$|+|0-Infinite)]
 ```
 
+## Document
+
 - Props Chain (属性链)
+
+  像Amazing 实例中的那样
+  ```javascript
+  const join = str => list => Function.prototype.call.bind(Array.prototype.join)(list, str);
+  const _ = xChain({}, ['You', 'by', "it$", "amazing", 'things', 'some', 'do', 'can'], join);
+  ```
+
 
 - Function Chain (函数调用链)
 
