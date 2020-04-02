@@ -15,20 +15,22 @@ const getCurrentApplyPath = (type, key, val) => {
     return { [key]: true };
   } else if (type === 'any' || type === 'a') {
     return { [key]: val };
+  } else if (type === 'ignore' || type === 'i') {
+    return undefined;
   }
   return key;
 }
-
+const filter = (list = [], curr) => list.concat(curr).filter(t => t);
 
 const xChain = (target = {}, fileds = [], callback = () => { }) => {
 
   function createPropChain(applyPath, type, funcName) {
     function chain(val) {
-      return callback.call(target, [...applyPath, getCurrentApplyPath(type, funcName, val)]);
+      return callback.call(target, filter(applyPath, getCurrentApplyPath(type, funcName, val)));
     }
 
     chain.__proto__ = proto;
-    chain._applyPath = [...applyPath, getCurrentApplyPath(type, funcName)];
+    chain._applyPath = filter(applyPath, getCurrentApplyPath(type, funcName));
 
     return chain;
   }
@@ -45,7 +47,7 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
       
       function chain() {}
       chain.__proto__ = proto;
-      chain._applyPath = [...applyPath, getCurrentApplyPath(type, funcName, finalVal)];
+      chain._applyPath = filter(applyPath, getCurrentApplyPath(type, funcName, finalVal));
 
       return chain;
     }
@@ -54,7 +56,7 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
   function createEndFuncChain(applyPath, type, funcName, defVal) {
     return function (val) {
       const finalVal = typeof val === 'undefined' ? defVal : val;
-      return callback.call(target, [...applyPath, getCurrentApplyPath(type, funcName, finalVal)]);
+      return callback.call(target, filter(applyPath, getCurrentApplyPath(type, funcName, finalVal)));
     };
   }
 
@@ -66,7 +68,7 @@ const xChain = (target = {}, fileds = [], callback = () => { }) => {
     .map(key => (key || '').trim())
     .filter(key => key)
     .forEach(key => {
-      const reg = /^(<(boolean|b|any|a)>)?(\w+?)(\(((.|\n)*?)\))?(\$)?$/g;
+      const reg = /^(<(boolean|b|any|a|ignore|i)>)?(\w+?)(\(((.|\n)*?)\))?(\$)?$/g;
       if (!reg.test(key)) {
         throw new Error(`Illegal parameter ${key}`);
       }
