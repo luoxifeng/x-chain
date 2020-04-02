@@ -28,12 +28,11 @@ const wow = _.You.can.do.some.amazing.things.by.it;
 console.log(wow); // You can do some amazing things by it
 ```
 
-
-## Demo
+## Simple Demo
 
 ```javascript
 
-const _ = xChain({}, ['a', 'b', "c", "d", 'dd(12)$', 's(2)'], function (paths) {
+const _ = xChain({}, ['a', 'b', "c", "d", 'dd(12)~-1', 's(2)'], function (paths) {
     console.log(paths);
 });
 
@@ -42,6 +41,35 @@ _.b.c.a.s().a(); // [ 'b', 'c', 'a', { s: 2 }, 'a' ]
 
 
 ```
+
+## Document
+
+```none
+
+[<a|b|i>]foo[([default])][~(|^|$|+|0-Infinite)]
+
+```
+
+- Props Chain (属性链)
+
+- Function Chain (函数调用链)
+
+- Tag (强制转换标签)
+  - `<boolean>` === `<b>`
+
+  - `<any>` === `<a>`
+
+  - `<ignore>` === `<i>` （尚不支持）
+
+- Position Limit (位置限制)
+  - Start `~^` === `~0` (尚不支持)
+
+  - Middle `~+` !== `~0` (尚不支持)
+
+  - End `~$` === `~-1`
+
+  - Sort `~[number]` (尚不支持)
+  
 
 ## 真实案例
   
